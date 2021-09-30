@@ -1,0 +1,11 @@
+# [dirs]
+.cache/
+.coverage/
+.docker/
+.phpunit.cache/
+var/
+vendor/
+
+# [files]
+docker-compose.yaml
+phpunit.xml
