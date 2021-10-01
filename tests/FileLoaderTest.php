@@ -14,11 +14,14 @@ class FileLoaderTest extends TestCase
      */
     public function test_file_loader_factory_works(): void
     {
+        // prepare
         $filename   = 'fixtures.json';
         $loaderType = $this->_get_ext($filename);
 
+        // do
         $fileLoader = FileLoaderFactory::create($loaderType);
 
+        // assert
         self::assertInstanceOf(FileLoaderInterface::class, $fileLoader);
     }
 
@@ -27,11 +30,14 @@ class FileLoaderTest extends TestCase
      */
     public function test_file_loader_factory_throws_when_file_type_is_not_supported(): void
     {
+        // prepare
         $filename   = 'fixtures.jsonx';
         $loaderType = $this->_get_ext($filename);
 
+        // assert
         self::expectException(FileLoaderException::class);
 
+        // do
         $fileLoader = FileLoaderFactory::create($loaderType);
     }
 
@@ -40,10 +46,14 @@ class FileLoaderTest extends TestCase
      */
     public function test_file_loader_factory_registers_new_file_loader_type(): void
     {
+        // prepare
         $loaderType           = array('yaml', 'yml');
         $loaderImplementation = 'YamlFileLoader';
 
+        // do
         $typesRegistered = FileLoaderFactory::registerLoader($loaderType, $loaderImplementation);
+
+        // assert
         self::assertGreaterThan(0, $typesRegistered);
     }
 
@@ -52,11 +62,14 @@ class FileLoaderTest extends TestCase
      */
     public function test_file_loader_factory_throws_when_registering_junk(): void
     {
+        // prepare
         $loaderType           = array(null);
         $loaderImplementation = 'YamlFileLoader';
 
+        // assert
         self::expectException(FileLoaderException::class);
 
+        // do
         $typesRegistered = FileLoaderFactory::registerLoader($loaderType, $loaderImplementation);
     }
 
@@ -67,12 +80,15 @@ class FileLoaderTest extends TestCase
      */
     public function test_loader_successful_json_parse(): void
     {
+        // prepare
         $existingFileName = 'fixtures.json';
         $loaderType       = $this->_get_ext($existingFileName);
+        $fileLoader       = FileLoaderFactory::create($loaderType);
 
-        $fileLoader = FileLoaderFactory::create($loaderType);
-
+        // do
         $contents = $fileLoader->loadFile($existingFileName);
+
+        // assert
         self::assertIsArray($contents);
     }
 
@@ -83,8 +99,13 @@ class FileLoaderTest extends TestCase
      */
     public function test_loader_non_json_file(): void
     {
+        // prepare
         $nonJsonFileName = 'fixtures';
+
+        // assert
         self::expectException(FileLoaderException::class);
+
+        //do
         $fileLoader = FileLoaderFactory::create($nonJsonFileName);
     }
 
@@ -95,12 +116,16 @@ class FileLoaderTest extends TestCase
      */
     public function test_loader_non_readable_file(): void
     {
+        // prepare
         $missingFileName = 'missing.json';
         $loaderType      = $this->_get_ext($missingFileName);
 
         $fileLoader = FileLoaderFactory::create($loaderType);
 
+        // assert
         self::expectException(FileLoaderException::class);
+
+        // do
         $contents = $fileLoader->loadFile($missingFileName);
     }
 
@@ -112,12 +137,17 @@ class FileLoaderTest extends TestCase
      */
     public function test_config_loading_a_valid_file_and_getting_a_path(): void
     {
+        // prepare
         $existingFileName = 'fixtures.json';
         $loaderType       = $this->_get_ext($existingFileName);
-        $fileLoader       = FileLoaderFactory::create($loaderType);
-        $config           = new Config($fileLoader);
+
+        $fileLoader = FileLoaderFactory::create($loaderType);
+        $config     = new Config($fileLoader);
+
+        // do
         $config->loadFromFile($existingFileName);
 
+        // assert
         self::assertNull($config->get('some.path'));
     }
 
@@ -126,7 +156,7 @@ class FileLoaderTest extends TestCase
      * @param  string $filePath     File path to extract from.
      * @return string               Returns file extension if found.
      */
-    protected function _get_ext(string $filePath)
+    protected function _get_ext(string $filePath): string
     {
         $pInfo = pathinfo($filePath);
         return $pInfo['extension'];
