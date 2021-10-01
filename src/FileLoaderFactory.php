@@ -24,20 +24,16 @@ class FileLoaderFactory
     /**
      * Assuming the file extension is consistent with the file contents.
      *
-     * @param  string $filePath         The configuration filename.
+     * @param  string $fileExtension    The configuration filename extension to be able to parse.
      *
      * @throws FileLoaderException      If there is no suitable file loader found for the requested file type.
      *
      * @return FileLoaderInterface  Returns a concrete file loader instance.
      */
-    public static function create(string $filePath): FileLoaderInterface
+    public static function create(string $loaderType): FileLoaderInterface
     {
-        $pInfo = pathinfo($filePath);
-
-        $loaderType = $pInfo['extension'];
-
         if (!isset(self::$_loaderMap[$loaderType])) {
-            throw new FileLoaderException(sprintf('Could not find suitable file loader for [%s] files!', $pInfo['extension']));
+            throw new FileLoaderException(sprintf('Could not find suitable file loader for [%s] files!', $loaderType));
         }
 
         // Enforcing singleton pattern via the factory
