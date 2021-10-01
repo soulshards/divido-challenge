@@ -9,3 +9,6 @@ vendor/
 # [files]
 docker-compose.yaml
 phpunit.xml
+
+# exclude all json files used for tests
+*.json
