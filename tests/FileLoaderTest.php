@@ -75,6 +75,7 @@ class FileLoaderTest extends TestCase
 
     /**
      * @covers App\JsonFileLoader::loadFile
+     * @covers App\JsonFileLoader::getProcessedFileNames
      *
      * @uses App\FileLoaderFactory::create
      */
@@ -90,6 +91,7 @@ class FileLoaderTest extends TestCase
 
         // assert
         self::assertIsArray($contents);
+        self::assertContains($existingFileName, $fileLoader->getProcessedFileNames('successful'));
     }
 
     /**
@@ -127,6 +129,48 @@ class FileLoaderTest extends TestCase
 
         // do
         $contents = $fileLoader->loadFile($missingFileName);
+    }
+
+    /**
+     * @covers App\JsonFileLoader
+     *
+     * @uses App\FileLoaderFactory::create
+     */
+    public function test_loader_empty_file(): void
+    {
+        // prepare
+        $emptyFileName = 'empty.json';
+        $loaderType    = $this->_get_ext($emptyFileName);
+
+        $fileLoader = FileLoaderFactory::create($loaderType);
+
+        // do
+        $contents = $fileLoader->loadFile($emptyFileName);
+
+        // assert
+        self::assertNull($contents);
+        self::assertContains($emptyFileName, $fileLoader->getProcessedFileNames('failed'));
+    }
+
+    /**
+     * @covers App\JsonFileLoader
+     * @group single
+     * @uses App\FileLoaderFactory::create
+     */
+    public function test_loader_corrupt_file(): void
+    {
+        // prepare
+        $corruptFileName = 'corrupted.json';
+        $loaderType      = $this->_get_ext($corruptFileName);
+
+        $fileLoader = FileLoaderFactory::create($loaderType);
+
+        // do
+        $contents = $fileLoader->loadFile($corruptFileName);
+
+        // assert
+        self::assertNull($contents);
+        self::assertContains($corruptFileName, $fileLoader->getProcessedFileNames('failed'));
     }
 
     /**
