@@ -1,6 +1,5 @@
 <?php
 
-use App\Config;
 use App\FileLoaderException;
 use App\FileLoaderFactory;
 use App\FileLoaderInterface;
@@ -9,8 +8,14 @@ use PHPUnit\Framework\TestCase;
 class FileLoaderTest extends TestCase
 {
 
+    public function setUp(): void
+    {
+        FileLoaderFactory::resetState();
+    }
+
     /**
      * @covers App\FileLoaderFactory::create
+     *
      */
     public function test_file_loader_factory_works(): void
     {
@@ -48,7 +53,7 @@ class FileLoaderTest extends TestCase
     {
         // prepare
         $loaderType           = array('yaml', 'yml');
-        $loaderImplementation = 'YamlFileLoader';
+        $loaderImplementation = 'YamlFileLoader'; // Supposedly YamlFileLoader::class
 
         // do
         $typesRegistered = FileLoaderFactory::registerLoader($loaderType, $loaderImplementation);
@@ -75,7 +80,6 @@ class FileLoaderTest extends TestCase
 
     /**
      * @covers App\JsonFileLoader::loadFile
-     * @covers App\JsonFileLoader::getProcessedFileNames
      *
      * @uses App\FileLoaderFactory::create
      */
@@ -84,14 +88,14 @@ class FileLoaderTest extends TestCase
         // prepare
         $existingFileName = 'fixtures.json';
         $loaderType       = $this->_get_ext($existingFileName);
-        $fileLoader       = FileLoaderFactory::create($loaderType);
+
+        $fileLoader = FileLoaderFactory::create($loaderType);
 
         // do
         $contents = $fileLoader->loadFile($existingFileName);
 
         // assert
         self::assertIsArray($contents);
-        self::assertContains($existingFileName, $fileLoader->getProcessedFileNames('successful'));
     }
 
     /**
@@ -114,6 +118,7 @@ class FileLoaderTest extends TestCase
     /**
      * @covers App\JsonFileLoader
      *
+     * @uses App\FileLoaderFactory::resetState
      * @uses App\FileLoaderFactory::create
      */
     public function test_loader_non_readable_file(): void
@@ -149,12 +154,12 @@ class FileLoaderTest extends TestCase
 
         // assert
         self::assertNull($contents);
-        self::assertContains($emptyFileName, $fileLoader->getProcessedFileNames('failed'));
     }
 
     /**
      * @covers App\JsonFileLoader
-     * @group single
+     *
+     * @uses App\FileLoaderFactory::resetState
      * @uses App\FileLoaderFactory::create
      */
     public function test_loader_corrupt_file(): void
@@ -170,29 +175,6 @@ class FileLoaderTest extends TestCase
 
         // assert
         self::assertNull($contents);
-        self::assertContains($corruptFileName, $fileLoader->getProcessedFileNames('failed'));
-    }
-
-    /**
-     * @covers App\Config
-     * @covers App\JsonFileLoader::loadFile
-     *
-     * @uses App\FileLoaderFactory::create
-     */
-    public function test_config_loading_a_valid_file_and_getting_a_path(): void
-    {
-        // prepare
-        $existingFileName = 'fixtures.json';
-        $loaderType       = $this->_get_ext($existingFileName);
-
-        $fileLoader = FileLoaderFactory::create($loaderType);
-        $config     = new Config($fileLoader);
-
-        // do
-        $config->loadFromFile($existingFileName);
-
-        // assert
-        self::assertNull($config->get('some.path'));
     }
 
     /**

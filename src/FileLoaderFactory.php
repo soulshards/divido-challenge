@@ -66,4 +66,18 @@ class FileLoaderFactory
         return count($types);
     }
 
+    /**
+     * Helper method, solely for testing purposes,
+     * because in a usual workflow the state
+     * of the class should persist between calls.
+     *
+     * @codeCoverageIgnore
+     *
+     * @return void
+     */
+    public static function resetState(): void
+    {
+        self::$_loaders = array();
+    }
+
 }
