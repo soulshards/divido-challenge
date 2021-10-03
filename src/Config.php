@@ -2,6 +2,8 @@
 
 namespace App;
 
+use App\ConfigException;
+
 class Config
 {
 
@@ -48,10 +50,11 @@ class Config
 
                 if (!is_string($configFileName)) {
 
-                    $this->_filesProcessed['failed'][(string) $configFileName] = sprintf('Configuration file names must be of type [string], instead found [%s]! Skipping', gettype($configFileName));
+                    $this->_filesProcessed['failed'][(string) $configFileName] = sprintf('Configuration file names must be of type [string], instead found [%s]. Skipping!', gettype($configFileName));
+                    continue;
                 }
 
-                if (0 !== strpos($configFileName, '/' && self::$_baseDir != '')) {
+                if (0 !== strpos($configFileName, '/') && self::$_baseDir != '') {
                     $configFileName = self::$_baseDir . $configFileName;
                 }
                 // var_dump($configFileName, self::$_baseDir);
@@ -125,16 +128,29 @@ class Config
      *
      * @param string $baseDir       Directory path.
      *
-     * @throws FileLoaderException  When the directory is not readable.
+     * @throws ConfigException  When the directory is not readable.
      *
      * @return void
      */
     public static function setBaseDir(string $baseDir): void
     {
         if (!is_readable($baseDir)) {
-            throw new FileLoaderException(sprintf('Base directory [%s] not readable!', $baseDir));
+
+            // Silently accepting/discarding an invalid directory as base is
+            // in my opinion wrong, as it might lead to false assumptions
+            // that the call went through.
+            //
+            // Arguably this is not severe enough
+            // condition to raise an exception but I prefer to be on the safer
+            // side rather than failing when files are attempted to be read.
+            //
+            // Exceptions are not something scary, instead they're a good way to communicate concerns
+            // with client code when the class/module cannot handle errors internally.
+
+            throw new ConfigException(sprintf('Base directory [%s] not readable!', $baseDir));
         }
 
+        // normalize trailing slash
         if (strpos($baseDir, '/') !== strlen($baseDir)) {
             $baseDir .= '/';
         }

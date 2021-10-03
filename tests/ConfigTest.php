@@ -1,6 +1,7 @@
 <?php
 
 use App\Config;
+use App\ConfigException;
 use App\FileLoaderFactory;
 use PHPUnit\Framework\TestCase;
 
@@ -22,6 +23,30 @@ class ConfigTest extends TestCase
     {
         // prepare
         $existingFileNames = array('fixtures.json', 'fixtures2.json');
+        $loaderType        = $this->_get_ext($existingFileNames[0]);
+
+        $fileLoader = FileLoaderFactory::create($loaderType);
+        $config     = new Config($fileLoader);
+
+        // do
+        $config->loadFromFiles($existingFileNames);
+
+        // assert
+        self::assertIsString($config->getByPath('environment'));
+        self::assertIsArray($config->getByPath('database'));
+        self::assertIsString($config->getByPath('database.host'));
+    }
+
+    /**
+     * @covers App\Config
+     *
+     * @uses App\FileLoaderFactory::create
+     * @uses App\JsonFileLoader::loadFile
+     */
+    public function test_config_loading_a_valid_file_with_absolute_path_and_getting_valid_paths(): void
+    {
+        // prepare
+        $existingFileNames = array('/app/tests/fixtures/fixtures.json', 'fixtures2.json');
         $loaderType        = $this->_get_ext($existingFileNames[0]);
 
         $fileLoader = FileLoaderFactory::create($loaderType);
@@ -153,7 +178,7 @@ class ConfigTest extends TestCase
     public function test_config_loading_an_invalid_file(): void
     {
         // prepare
-        $existingFileNames = array('fixtures_missing.json');
+        $existingFileNames = array('fixtures_missing.json', 2, null, [], new \Exception());
         $loaderType        = $this->_get_ext($existingFileNames[0]);
 
         $fileLoader = FileLoaderFactory::create($loaderType);
@@ -231,6 +256,21 @@ class ConfigTest extends TestCase
 
         self::assertIsArray($parsedFilesFail);
         self::assertCount(0, $parsedFilesFail);
+    }
+
+    /**
+     * @covers App\Config
+     *
+     * @uses App\FileLoaderFactory::create
+     * @uses App\JsonFileLoader::loadFile
+     */
+    public function test_config_setting_invalid_basedir(): void
+    {
+        // assert
+        self::expectException(ConfigException::class);
+
+        // do
+        Config::setBaseDir('././.././../../......//./');
     }
 
     /**
