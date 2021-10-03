@@ -7,10 +7,12 @@ use PHPUnit\Framework\TestCase;
 
 class FileLoaderTest extends TestCase
 {
+    protected $_baseDir = '';
 
     public function setUp(): void
     {
         FileLoaderFactory::resetState();
+        $this->_baseDir = __DIR__ . '/fixtures/';
     }
 
     /**
@@ -20,7 +22,7 @@ class FileLoaderTest extends TestCase
     public function test_file_loader_factory_works(): void
     {
         // prepare
-        $filename   = 'fixtures.json';
+        $filename   = $this->_baseDir . 'fixtures.json';
         $loaderType = $this->_get_ext($filename);
 
         // do
@@ -36,7 +38,7 @@ class FileLoaderTest extends TestCase
     public function test_file_loader_factory_throws_when_file_type_is_not_supported(): void
     {
         // prepare
-        $filename   = 'fixtures.jsonx';
+        $filename   = $this->_baseDir . 'fixtures.jsonx';
         $loaderType = $this->_get_ext($filename);
 
         // assert
@@ -86,7 +88,7 @@ class FileLoaderTest extends TestCase
     public function test_loader_successful_json_parse(): void
     {
         // prepare
-        $existingFileName = 'fixtures.json';
+        $existingFileName = $this->_baseDir . 'fixtures.json';
         $loaderType       = $this->_get_ext($existingFileName);
 
         $fileLoader = FileLoaderFactory::create($loaderType);
@@ -106,7 +108,7 @@ class FileLoaderTest extends TestCase
     public function test_loader_non_json_file(): void
     {
         // prepare
-        $nonJsonFileName = 'fixtures';
+        $nonJsonFileName = $this->_baseDir . 'fixtures';
 
         // assert
         self::expectException(FileLoaderException::class);
@@ -124,7 +126,7 @@ class FileLoaderTest extends TestCase
     public function test_loader_non_readable_file(): void
     {
         // prepare
-        $missingFileName = 'missing.json';
+        $missingFileName = $this->_baseDir . 'missing.json';
         $loaderType      = $this->_get_ext($missingFileName);
 
         $fileLoader = FileLoaderFactory::create($loaderType);
@@ -144,7 +146,7 @@ class FileLoaderTest extends TestCase
     public function test_loader_empty_file(): void
     {
         // prepare
-        $emptyFileName = 'empty.json';
+        $emptyFileName = $this->_baseDir . 'empty.json';
         $loaderType    = $this->_get_ext($emptyFileName);
 
         $fileLoader = FileLoaderFactory::create($loaderType);
@@ -165,7 +167,7 @@ class FileLoaderTest extends TestCase
     public function test_loader_corrupt_file(): void
     {
         // prepare
-        $corruptFileName = 'corrupted.json';
+        $corruptFileName = $this->_baseDir . 'corrupted.json';
         $loaderType      = $this->_get_ext($corruptFileName);
 
         $fileLoader = FileLoaderFactory::create($loaderType);

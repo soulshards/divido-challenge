@@ -7,6 +7,11 @@ use PHPUnit\Framework\TestCase;
 class ConfigTest extends TestCase
 {
 
+    public function setUp(): void
+    {
+        Config::setBaseDir(__DIR__ . '/fixtures');
+    }
+
     /**
      * @covers App\Config
      *
@@ -57,8 +62,6 @@ class ConfigTest extends TestCase
 
     /**
      * @covers App\Config
-     *
-     * @group single
      *
      * @uses App\FileLoaderFactory::create
      * @uses App\JsonFileLoader::loadFile

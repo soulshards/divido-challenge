@@ -12,18 +12,18 @@ class Config
     protected $_data = array();
 
     /**
-     * Container for the configuration data loaded from the files.
-     * @var array
-     */
-    protected $_configCollection = array();
-
-    /**
      * List of file names processed
      * @todo: Current implementation allows for multiple passes of the same file
      *         overwriting the outcome.
      * @var array
      */
     protected $_filesProcessed = array();
+
+    /**
+     * Base dir to prepend to all relative file paths.
+     * @var string
+     */
+    protected static $_baseDir = '';
 
     /**
      * @param FileLoader $fileLoader
@@ -46,6 +46,15 @@ class Config
         foreach ($configFileNames as $configFileName) {
             try {
 
+                if (!is_string($configFileName)) {
+
+                    $this->_filesProcessed['failed'][(string) $configFileName] = sprintf('Configuration file names must be of type [string], instead found [%s]! Skipping', gettype($configFileName));
+                }
+
+                if (0 !== strpos($configFileName, '/' && self::$_baseDir != '')) {
+                    $configFileName = self::$_baseDir . $configFileName;
+                }
+                // var_dump($configFileName, self::$_baseDir);
                 $contents = $this->fileLoader->loadFile($configFileName);
 
                 if (!is_null($contents)) {
@@ -109,6 +118,27 @@ class Config
             $result = $this->_filesProcessed[$outcome];
         }
         return $result;
+    }
+
+    /**
+     * Setter method for base dir used when relative file paths are supplied.
+     *
+     * @param string $baseDir       Directory path.
+     *
+     * @throws FileLoaderException  When the directory is not readable.
+     *
+     * @return void
+     */
+    public static function setBaseDir(string $baseDir): void
+    {
+        if (!is_readable($baseDir)) {
+            throw new FileLoaderException(sprintf('Base directory [%s] not readable!', $baseDir));
+        }
+
+        if (strpos($baseDir, '/') !== strlen($baseDir)) {
+            $baseDir .= '/';
+        }
+        self::$_baseDir = $baseDir;
     }
 
     /**
