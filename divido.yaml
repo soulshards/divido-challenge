@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  inspect:
+    build:
+      context: .
+      dockerfile: Dockerfile-divido
+    restart: never
+    working_dir: /app
+    command: ["/bin/bash"]
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile-divido
+    # volumes:
+    #   - .:/app/tests/fixtures
+    restart: never
+    working_dir: /app
+    command: ['vendor/bin/phpunit', 'tests/']

@@ -1,0 +1,20 @@
+# Lock to a specific version of PHP
+FROM php:7.4-cli
+
+# Install what is needed for composer to run + git
+RUN apt update && apt install -y git zip unzip libzip-dev && docker-php-ext-install zip
+
+WORKDIR /app
+
+# Get the repo from GitHub
+RUN git clone https://github.com/soulshards/divido-challenge .
+
+# Lock to a specific version of composer to ensure consistency over time.
+COPY --from=composer:2.1.8 /usr/bin/composer /usr/local/bin/composer
+
+RUN composer install
+
+# For the sake of completeness I've included the fixtures into the project repository.
+# Otherwise for local dev I would rather mount a volume into the container.
+
+# COPY tests/fixtures /app/tests/fixtures
