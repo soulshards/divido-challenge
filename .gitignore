@@ -10,5 +10,7 @@ vendor/
 docker-compose.yaml
 phpunit.xml
 
+# Added the json files to the repo for completeness of the example.
+
 # exclude all json files used for tests
-*.json
+# *.json
